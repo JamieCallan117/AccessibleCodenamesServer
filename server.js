@@ -9,6 +9,7 @@ let rooms = {};
 io.on("connection", (socket) => {
     console.log("User connected.");
 
+    //Need to add all game attributes to newRoom, such as the word list, starting team, list of what type each word is etc.
     socket.on("createRoom", (user, roomName, password) => {
         let newRoom = { roomName, password, sockets: [] };
 
@@ -79,37 +80,38 @@ io.on("connection", (socket) => {
         });
     });
 
+    //Add functionality
+    socket.on("getGameDetails", (roomName) => {
+        console.log("Retrieving game details for room " + roomName + ".");
+    });
+
     socket.on("getUsers", (roomName) => {
         console.log("Returning users for room " + roomName + ".");
         socket.emit("roomUsers", rooms[roomName].sockets)
     });
 
-    //
-    //     socket.on("wordButton", (word) => {
-    //         console.log("WordButton: " + word);
-    //         io.to(user.room).emit("wordButton", word);
-    //     })
-    //
-    //     socket.on("neutral", (word) => {
-    //         console.log("Neutral: " + word);
-    //         io.to(user.room).emit("neutral",word);
-    //     })
-    //
-    //     socket.on("bomb", (word) => {
-    //         console.log("Bomb: " + word);
-    //         io.to(user.room).emit("bomb", word);
-    //     })
-    //
-    //     socket.on("hint", (word) => {
-    //         console.log("Hint: " + word);
-    //         io.to(user.room).emit("hint", word);
-    //     })
-    //
-    //     socket.on("chat", (word) => {
-    //         console.log("Chat: " + word);
-    //         io.to(user.room).emit("chat", word);
-    //     })
-    // })
+    socket.on("wordButton", (word, roomName) => {
+        io.to(roomName).emit("wordButton", word);
+        console.log("Word " + word + " selected in room " + roomName + ".");
+    });
+
+    socket.on("hint", (hint, roomName) => {
+        console.log("Hint " + hint + " for room " + roomName + ".");
+        io.to(roomName).emit("hint", hint);
+    });
+
+    socket.on("chat", (user, team, message, roomName) => {
+        console.log("Message from user " + user + " on team " + team + ": " + message);
+
+        switch(team) {
+            case "a":
+                io.to(roomName).emit("teamAChat",user + ": " + message);
+                break;
+            case "b":
+                io.to(roomName).emit("teamBChat",user + ": " + message);
+                break;
+        }
+    });
 });
 
 
