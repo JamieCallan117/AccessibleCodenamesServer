@@ -8,7 +8,7 @@ const io = new Server(server);
 let rooms = {};
 
 io.on("connection", (socket) => {
-    console.log("User connected");
+    console.log("User connected.");
 
     socket.on("createRoom", (user, roomName, password) => {
         let newRoom = { roomName, password, sockets: [] };
@@ -23,7 +23,7 @@ io.on("connection", (socket) => {
             socket.join(roomName);
             newRoom.sockets.push(user);
         }
-    })
+    });
 
     socket.on("joinRoom", (user, roomName, password) => {
         let roomToJoin = rooms[roomName];
@@ -42,6 +42,16 @@ io.on("connection", (socket) => {
             socket.join(roomName);
             roomToJoin.sockets.push(user);
         }
+    });
+
+    socket.on("getUsers", (roomName) => {
+        console.log("Returning users for room " + roomName + ".");
+        socket.emit("roomUsers", rooms[roomName].sockets)
+    });
+
+    socket.on("disconnect", () => {
+        io.emit("userDisconnect");
+        console.log("User disconnected.")
     })
 
     //socket.on("createRoom", ())
