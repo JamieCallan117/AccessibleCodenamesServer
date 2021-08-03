@@ -23,6 +23,24 @@ io.on("connection", (socket) => {
             socket.join(roomName);
             newRoom.sockets.push(user);
         }
+
+        socket.on("leaveRoom", () => {
+            const index = newRoom.sockets.indexOf(user);
+
+            if (index > -1) {
+                console.log("User " + user + " has left the room " + roomName + ".");
+                newRoom.sockets.splice(index, 1);
+            }
+        });
+
+        socket.on("disconnect", () => {
+            const index = newRoom.sockets.indexOf(user);
+
+            if (index > -1) {
+                console.log("User " + user + " has disconnected.");
+                newRoom.sockets.splice(index, 1);
+            }
+        });
     });
 
     socket.on("joinRoom", (user, roomName, password) => {
@@ -42,6 +60,24 @@ io.on("connection", (socket) => {
             socket.join(roomName);
             roomToJoin.sockets.push(user);
         }
+
+        socket.on("leaveRoom", () => {
+            const index = roomToJoin.sockets.indexOf(user);
+
+            if (index > -1) {
+                console.log("User " + user + " has left the room " + roomName + ".");
+                roomToJoin.sockets.splice(index, 1);
+            }
+        });
+
+        socket.on("disconnect", () => {
+            const index = roomToJoin.sockets.indexOf(user);
+
+            if (index > -1) {
+                console.log("User " + user + " has disconnected.");
+                roomToJoin.sockets.splice(index, 1);
+            }
+        });
     });
 
     socket.on("getUsers", (roomName) => {
@@ -49,10 +85,10 @@ io.on("connection", (socket) => {
         socket.emit("roomUsers", rooms[roomName].sockets)
     });
 
-    socket.on("disconnect", () => {
-        io.emit("userDisconnect");
-        console.log("User disconnected.")
-    })
+    // socket.on("disconnect", () => {
+    //     io.emit("userDisconnect");
+    //     console.log("User disconnected.")
+    // })
 
     //socket.on("createRoom", ())
 
