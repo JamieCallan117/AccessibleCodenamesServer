@@ -10,8 +10,9 @@ io.on("connection", (socket) => {
     console.log("User connected.");
 
     //Need to add all game attributes to newRoom, such as the word list, starting team, list of what type each word is etc.
-    socket.on("createRoom", (user, roomName, password) => {
-        let newRoom = { roomName, password, sockets: [] };
+    socket.once("createRoom", (user, roomName, password, bombWords, neutralWords, teamASquares, teamBSquares, startingTeam, customWords) => {
+        let newRoom = { roomName, password, sockets: [], closed: false, bombWords,
+            neutralWords, teamASquares, teamBSquares, startingTeam, customWords};
 
         if (rooms[roomName] !== undefined) {
             socket.emit("createFail", "The room " + roomName + " already exists.")
@@ -20,30 +21,34 @@ io.on("connection", (socket) => {
 
             console.log(user + " created room: " + roomName + ". Password: " + password);
 
-            socket.join(roomName);
+            socket.join(roomName.roomName);
             newRoom.sockets.push(user);
+
+            socket.once("leaveRoom", () => {
+                if (!newRoom.closed) {
+                    console.log("Host has left. Closing room " + roomName + ".")
+                    socket.emit("hostQuit");
+
+                    rooms[roomName] = undefined;
+
+                    newRoom.closed = true;
+                }
+            });
+
+            socket.once("disconnect", () => {
+                if (!newRoom.closed) {
+                    console.log("Host has left. Closing room " + roomName + ".")
+                    socket.emit("hostQuit");
+
+                    rooms[roomName] = undefined;
+
+                    newRoom.closed = true;
+                }
+            });
         }
-
-        socket.on("leaveRoom", () => {
-            const index = newRoom.sockets.indexOf(user);
-
-            if (index > -1) {
-                console.log("User " + user + " has left the room " + roomName + ".");
-                newRoom.sockets.splice(index, 1);
-            }
-        });
-
-        socket.on("disconnect", () => {
-            const index = newRoom.sockets.indexOf(user);
-
-            if (index > -1) {
-                console.log("User " + user + " has disconnected.");
-                newRoom.sockets.splice(index, 1);
-            }
-        });
     });
 
-    socket.on("joinRoom", (user, roomName, password) => {
+    socket.once("joinRoom", (user, roomName, password) => {
         let roomToJoin = rooms[roomName];
 
         if (roomToJoin === undefined) {
@@ -52,37 +57,52 @@ io.on("connection", (socket) => {
         } else if (roomToJoin.password !== password) {
             console.log("Invalid password for room " + roomName + ".")
             socket.emit("joinFail", "Invalid password for room " + roomName + ".")
-        } else if (roomToJoin.sockets.find(userName => user == userName) !== undefined) {
+            //If an error replace === with ==
+        } else if (roomToJoin.sockets.find(userName => user === userName) !== undefined) {
             console.log("Username " + user + " in use.")
             socket.emit("joinFail", "Username " + user + " in use.")
         } else {
             console.log("User " + user + " successfully joined room " + roomName + ".")
             socket.join(roomName);
             roomToJoin.sockets.push(user);
+
+            socket.once("leaveRoom", () => {
+                const index = roomToJoin.sockets.indexOf(user);
+
+                if (index > -1) {
+                    console.log("User " + user + " has left the room " + roomName + ".");
+                    roomToJoin.sockets.splice(index, 1);
+                }
+            });
+
+            socket.once("disconnect", () => {
+                const index = roomToJoin.sockets.indexOf(user);
+
+                if (index > -1) {
+                    console.log("User " + user + " has disconnected.");
+                    roomToJoin.sockets.splice(index, 1);
+                }
+            });
         }
+    });
 
-        socket.on("leaveRoom", () => {
-            const index = roomToJoin.sockets.indexOf(user);
-
-            if (index > -1) {
-                console.log("User " + user + " has left the room " + roomName + ".");
-                roomToJoin.sockets.splice(index, 1);
-            }
-        });
-
-        socket.on("disconnect", () => {
-            const index = roomToJoin.sockets.indexOf(user);
-
-            if (index > -1) {
-                console.log("User " + user + " has disconnected.");
-                roomToJoin.sockets.splice(index, 1);
-            }
-        });
+    socket.on("getAllRooms", () => {
+        socket.emit("allRooms", rooms);
     });
 
     //Add functionality
     socket.on("getGameDetails", (roomName) => {
         console.log("Retrieving game details for room " + roomName + ".");
+    });
+
+    socket.on("requestSpymaster", (user, roomName) => {
+        console.log("User " + user + " has request spymaster in room " + roomName + ".");
+        io.to(roomName).emit("spymasterRequest", user);
+    });
+
+    socket.on("chooseTeam", (user, team, roomName) => {
+        console.log("User " + user + " has joined team " + team + ".");
+        io.to(roomName).emit("teamChange", user, team);
     });
 
     socket.on("getUsers", (roomName) => {
