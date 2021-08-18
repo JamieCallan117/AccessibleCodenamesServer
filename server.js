@@ -9,9 +9,9 @@ let rooms = {};
 io.on("connection", (socket) => {
     console.log("User connected.");
 
-    socket.once("createRoom", (user, roomName, password, bombWords, neutralWords, teamASquares, teamBSquares, startingTeam) => {
+    socket.once("createRoom", (user, roomName, password, allWords, bombWords, neutralWords, teamASquares, teamBSquares, startingTeam) => {
         let newRoom = { roomName, password, users: [], closed: false, started: false, teamAUsers: [], teamBUsers: [],
-            teamASpy: undefined, teamBSpy: undefined, bombWords, neutralWords, teamASquares, teamBSquares, startingTeam };
+            teamASpy: undefined, teamBSpy: undefined, allWords, bombWords, neutralWords, teamASquares, teamBSquares, startingTeam };
 
         if (rooms[roomName] !== undefined) {
             socket.emit("createFail", "The room " + roomName + " already exists.")
@@ -102,15 +102,15 @@ io.on("connection", (socket) => {
 
     socket.on("getGameDetails", (roomName) => {
         console.log("Retrieving game details for room " + roomName + ".");
-        socket.emit("gameDetails", rooms[roomName].teamAUsers, rooms[roomName].teamBUsers, rooms[roomName].teamASpy,
-            rooms[roomName].teamBSpy, rooms[roomName].bombWords, rooms[roomName].neutralWords, rooms[roomName].teamASquares,
-            rooms[roomName].teamBSquares, rooms[roomName].startingTeam);
+        socket.emit("gameDetails", rooms[roomName].allWords, rooms[roomName].teamAUsers, rooms[roomName].teamBUsers,
+            rooms[roomName].teamASpy, rooms[roomName].teamBSpy, rooms[roomName].bombWords, rooms[roomName].neutralWords,
+            rooms[roomName].teamASquares, rooms[roomName].teamBSquares, rooms[roomName].startingTeam);
     });
 
     socket.on("requestSpymaster", (user, roomName, teamSpymaster) => {
         console.log("User " + user + " has request spymaster for team " + teamSpymaster + " in room " + roomName + ".");
 
-        if (teamSpymaster.equals("a")) {
+        if (teamSpymaster === "A") {
             if (rooms[roomName].teamASpy === undefined) {
                 rooms[roomName].teamASpy = user;
                 io.to(roomName).emit("teamASpymaster", user);
@@ -140,7 +140,7 @@ io.on("connection", (socket) => {
             rooms[roomName].teamBUsers.splice(teamBIndex, 1);
             rooms[roomName].teamAUsers.push(user);
         } else {
-            if (team.equals("A")) {
+            if (team === "A") {
                 rooms[roomName].teamAUsers.push(user);
             } else {
                 rooms[roomName].teamBUsers.push(user);
