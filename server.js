@@ -56,6 +56,7 @@ io.on("connection", (socket) => {
         }
     });
 
+    //Implement stuff for emiting when somebody leaves a game, will also need to add stuff for if spymaster quits
     socket.once("joinRoom", (user, roomName, password) => {
         let roomToJoin = rooms[roomName];
 
@@ -67,7 +68,7 @@ io.on("connection", (socket) => {
             socket.emit("joinFail", "Invalid password for room " + roomName + ".")
         } else if (roomToJoin.users.find(userName => user === userName) !== undefined) {
             console.log("Username " + user + " in use.")
-            socket.emit("joinFail", "Username " + user + " in use.")
+            socket.emit("joinFailNick", "Username " + user + " in use.")
         } else if (roomToJoin.started) {
             console.log("Room " + roomName + " has already started.");
             socket.emit("joinFail", "Room " + roomName + " has already started.");
@@ -113,6 +114,7 @@ io.on("connection", (socket) => {
         if (teamSpymaster === "A") {
             if (rooms[roomName].teamASpy === undefined) {
                 rooms[roomName].teamASpy = user;
+                socket.emit("teamASpymaster", user);
                 io.to(roomName).emit("teamASpymaster", user);
             } else {
                 socket.emit("spymasterFail")
@@ -120,6 +122,7 @@ io.on("connection", (socket) => {
         } else {
             if (rooms[roomName].teamBSpy === undefined) {
                 rooms[roomName].teamBSpy = user;
+                socket.emit("teamBSpymaster", user);
                 io.to(roomName).emit("teamBSpymaster", user);
             } else {
                 socket.emit("spymasterFail")
@@ -149,16 +152,19 @@ io.on("connection", (socket) => {
 
         console.log("User " + user + " has joined team " + team + ".");
 
+        socket.emit("teamChange", user, team);
         io.to(roomName).emit("teamChange", user, team);
     });
 
     socket.on("wordButton", (word, roomName) => {
+        socket.emit("wordButton", word);
         io.to(roomName).emit("wordButton", word);
         console.log("Word " + word + " selected in room " + roomName + ".");
     });
 
     socket.on("hint", (hint, roomName) => {
         console.log("Hint " + hint + " for room " + roomName + ".");
+        socket.emit("hint", hint);
         io.to(roomName).emit("hint", hint);
     });
 
@@ -166,10 +172,12 @@ io.on("connection", (socket) => {
         console.log("Message from user " + user + " on team " + team + ": " + message);
 
         switch(team) {
-            case "a":
+            case "A":
+                socket.emit("teamAChat",user + ": " + message);
                 io.to(roomName).emit("teamAChat",user + ": " + message);
                 break;
-            case "b":
+            case "B":
+                socket.emit("teamAChat",user + ": " + message);
                 io.to(roomName).emit("teamBChat",user + ": " + message);
                 break;
         }
