@@ -56,7 +56,7 @@ io.on("connection", (socket) => {
         }
     });
 
-    //Implement stuff for emiting when somebody leaves a game, will also need to add stuff for if spymaster quits
+    //Implement stuff for emitting when somebody leaves a game, will also need to add stuff for if spymaster quits
     socket.once("joinRoom", (user, roomName, password) => {
         let roomToJoin = rooms[roomName];
 
@@ -115,16 +115,20 @@ io.on("connection", (socket) => {
             if (rooms[roomName].teamASpy === undefined) {
                 rooms[roomName].teamASpy = user;
                 socket.emit("teamASpymaster", user);
+                console.log("User " + user + " is now the spymaster for team" + teamSpymaster + " in room " + roomName + ".");
                 io.to(roomName).emit("teamASpymaster", user);
             } else {
+                console.log("User " + user + " was denied spymaster for team" + teamSpymaster + " in room " + roomName + ".");
                 socket.emit("spymasterFail")
             }
         } else {
             if (rooms[roomName].teamBSpy === undefined) {
                 rooms[roomName].teamBSpy = user;
                 socket.emit("teamBSpymaster", user);
+                console.log("User " + user + " is now the spymaster for team" + teamSpymaster + " in room " + roomName + ".");
                 io.to(roomName).emit("teamBSpymaster", user);
             } else {
+                console.log("User " + user + " was denied spymaster for team" + teamSpymaster + " in room " + roomName + ".");
                 socket.emit("spymasterFail")
             }
         }
