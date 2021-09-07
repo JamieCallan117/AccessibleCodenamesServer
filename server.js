@@ -220,12 +220,12 @@ io.on("connection", (socket) => {
 
         switch(team) {
             case "A":
-                socket.emit("teamAChat",user + ": " + message);
-                io.to(roomName).emit("teamAChat",user + ": " + message);
+                socket.emit("teamAChat", user, message);
+                io.to(roomName).emit("teamAChat", user, message);
                 break;
             case "B":
-                socket.emit("teamAChat",user + ": " + message);
-                io.to(roomName).emit("teamBChat",user + ": " + message);
+                socket.emit("teamBChat", user, message);
+                io.to(roomName).emit("teamBChat", user, message);
                 break;
         }
     });
