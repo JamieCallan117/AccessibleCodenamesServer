@@ -94,7 +94,7 @@ io.on("connection", (socket) => {
                     roomToJoin.users.splice(index, 1);
                 }
 
-                io.to(roomToJoin).emit("playerLeave", user);
+                io.to(roomToJoin).emit("playerQuit", user);
 
                 if (user === roomToJoin.teamASpy) {
                     roomToJoin.teamASpy = undefined;
@@ -125,7 +125,7 @@ io.on("connection", (socket) => {
                     roomToJoin.users.splice(index, 1);
                 }
 
-                io.to(roomToJoin).emit("playerLeave", user);
+                io.to(roomToJoin).emit("playerQuit", user);
 
                 if (user === roomToJoin.teamASpy) {
                     roomToJoin.teamASpy = undefined;
