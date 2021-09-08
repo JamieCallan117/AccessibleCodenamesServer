@@ -20,7 +20,7 @@ io.on("connection", (socket) => {
 
             console.log(user + " created room: " + roomName + ". Password: " + password);
 
-            socket.join(roomName.roomName);
+            socket.join(roomName);
             newRoom.users.push(user);
 
             socket.once("startGame", () => {
@@ -35,7 +35,7 @@ io.on("connection", (socket) => {
             socket.once("leaveRoom", () => {
                 if (!newRoom.closed) {
                     console.log("Host has left. Closing room " + roomName + ".")
-                    socket.emit("hostQuit");
+                    io.to(roomName).emit("hostQuit");
 
                     rooms[roomName] = undefined;
 
@@ -46,7 +46,7 @@ io.on("connection", (socket) => {
             socket.once("disconnect", () => {
                 if (!newRoom.closed) {
                     console.log("Host has left. Closing room " + roomName + ".")
-                    socket.emit("hostQuit");
+                    io.to(roomName).emit("hostQuit");
 
                     rooms[roomName] = undefined;
 
@@ -55,7 +55,7 @@ io.on("connection", (socket) => {
             });
         }
     });
-
+    
     socket.once("joinRoom", (user, roomName, password) => {
         let roomToJoin = rooms[roomName];
 
@@ -94,16 +94,16 @@ io.on("connection", (socket) => {
                     roomToJoin.users.splice(index, 1);
                 }
 
-                io.to(roomToJoin).emit("playerQuit", user);
+                io.to(roomName).emit("playerQuit", user);
 
                 if (user === roomToJoin.teamASpy) {
                     roomToJoin.teamASpy = undefined;
                     console.log("Team A Spymaster has left the room.");
-                    io.to(roomToJoin).emit("spymasterQuitA", user);
+                    io.to(roomName).emit("spymasterQuitA", user);
                 } else if (user === roomToJoin.teamBSpy) {
                     roomToJoin.teamBSpy = undefined;
                     console.log("Team B Spymaster has left the room.");
-                    io.to(roomToJoin).emit("spymasterQuitB", user);
+                    io.to(roomName).emit("spymasterQuitB", user);
                 }
             });
 
@@ -125,16 +125,16 @@ io.on("connection", (socket) => {
                     roomToJoin.users.splice(index, 1);
                 }
 
-                io.to(roomToJoin).emit("playerQuit", user);
+                io.to(roomName).emit("playerQuit", user);
 
                 if (user === roomToJoin.teamASpy) {
                     roomToJoin.teamASpy = undefined;
                     console.log("Team A Spymaster has left the room.");
-                    io.to(roomToJoin).emit("spymasterQuitA", user);
+                    io.to(roomName).emit("spymasterQuitA", user);
                 } else if (user === roomToJoin.teamBSpy) {
                     roomToJoin.teamBSpy = undefined;
                     console.log("Team B Spymaster has left the room.");
-                    io.to(roomToJoin).emit("spymasterQuitB", user);
+                    io.to(roomName).emit("spymasterQuitB", user);
                 }
             });
         }
@@ -157,7 +157,7 @@ io.on("connection", (socket) => {
         if (teamSpymaster === "A") {
             if (rooms[roomName].teamASpy === undefined) {
                 rooms[roomName].teamASpy = user;
-                socket.emit("teamASpymaster", user);
+                //socket.emit("teamASpymaster", user);
                 console.log("User " + user + " is now the spymaster for team" + teamSpymaster + " in room " + roomName + ".");
                 io.to(roomName).emit("teamASpymaster", user);
             } else {
@@ -167,7 +167,7 @@ io.on("connection", (socket) => {
         } else {
             if (rooms[roomName].teamBSpy === undefined) {
                 rooms[roomName].teamBSpy = user;
-                socket.emit("teamBSpymaster", user);
+                //socket.emit("teamBSpymaster", user);
                 console.log("User " + user + " is now the spymaster for team" + teamSpymaster + " in room " + roomName + ".");
                 io.to(roomName).emit("teamBSpymaster", user);
             } else {
@@ -199,19 +199,19 @@ io.on("connection", (socket) => {
 
         console.log("User " + user + " has joined team " + team + ".");
 
-        socket.emit("teamChange", user, team);
+        //socket.emit("teamChange", user, team);
         io.to(roomName).emit("teamChange", user, team);
     });
 
     socket.on("wordButton", (word, roomName) => {
-        socket.emit("wordButton", word);
+        //socket.emit("wordButton", word);
         io.to(roomName).emit("wordButton", word);
         console.log("Word " + word + " selected in room " + roomName + ".");
     });
 
     socket.on("hint", (hint, roomName) => {
         console.log("Hint " + hint + " for room " + roomName + ".");
-        socket.emit("hint", hint);
+        //socket.emit("hint", hint);
         io.to(roomName).emit("hint", hint);
     });
 
@@ -220,11 +220,11 @@ io.on("connection", (socket) => {
 
         switch(team) {
             case "A":
-                socket.emit("teamAChat", user, message);
+                //socket.emit("teamAChat", user, message);
                 io.to(roomName).emit("teamAChat", user, message);
                 break;
             case "B":
-                socket.emit("teamBChat", user, message);
+                //socket.emit("teamBChat", user, message);
                 io.to(roomName).emit("teamBChat", user, message);
                 break;
         }
