@@ -23,11 +23,25 @@ io.on("connection", (socket) => {
             socket.join(roomName);
             newRoom.users.push(user);
 
-            socket.once("startGame", () => {
+            socket.on("startGame", () => {
                 if ((newRoom.teamAUsers.length + newRoom.teamBUsers.length) !== newRoom.users.length) {
-                    socket.emit("startFail");
+                    console.log("Cannot start game. Not all users have selected a team.");
+                    socket.emit("startFail", "Not all users have selected a team.");
+                } else if (newRoom.teamASpy === undefined) {
+                    console.log("Cannot start game. Team A does not have a Spymaster.");
+                    socket.emit("startFail", "Team A does not have a Spymaster.");
+                } else if (newRoom.teamBSpy === undefined) {
+                    console.log("Cannot start game. Team B does not have a Spymaster.");
+                    socket.emit("startFail", "Team B does not have a Spymaster.");
+                } else if (newRoom.teamAUsers.length < 2) {
+                    console.log("Cannot start game. Team A does not have enough members.");
+                    socket.emit("startFail", "Team A does not have enough members.");
+                } else if (newRoom.teamBUsers.length < 2) {
+                    console.log("Cannot start game. Team B does not have enough members.");
+                    socket.emit("startFail", "Team B does not have enough members.");
                 } else {
                     newRoom.started = true;
+                    console.log("Successfully started game in room " + roomName);
                     socket.emit("startSuccess")
                 }
             });
