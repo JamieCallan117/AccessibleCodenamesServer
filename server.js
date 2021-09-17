@@ -42,7 +42,7 @@ io.on("connection", (socket) => {
                 } else {
                     newRoom.started = true;
                     console.log("Successfully started game in room " + roomName);
-                    socket.emit("startSuccess")
+                    io.to(roomName).emit("startSuccess")
                 }
             });
 
@@ -171,7 +171,6 @@ io.on("connection", (socket) => {
         if (teamSpymaster === "A") {
             if (rooms[roomName].teamASpy === undefined) {
                 rooms[roomName].teamASpy = user;
-                //socket.emit("teamASpymaster", user);
                 console.log("User " + user + " is now the spymaster for team" + teamSpymaster + " in room " + roomName + ".");
                 io.to(roomName).emit("teamASpymaster", user);
             } else {
@@ -181,7 +180,6 @@ io.on("connection", (socket) => {
         } else {
             if (rooms[roomName].teamBSpy === undefined) {
                 rooms[roomName].teamBSpy = user;
-                //socket.emit("teamBSpymaster", user);
                 console.log("User " + user + " is now the spymaster for team" + teamSpymaster + " in room " + roomName + ".");
                 io.to(roomName).emit("teamBSpymaster", user);
             } else {
@@ -213,19 +211,21 @@ io.on("connection", (socket) => {
 
         console.log("User " + user + " has joined team " + team + ".");
 
-        //socket.emit("teamChange", user, team);
         io.to(roomName).emit("teamChange", user, team);
     });
 
     socket.on("wordButton", (word, roomName) => {
-        //socket.emit("wordButton", word);
         io.to(roomName).emit("wordButton", word);
         console.log("Word " + word + " selected in room " + roomName + ".");
     });
 
+    socket.on("endTurn", (roomName) => {
+        io.to(roomName).emit("endTurn");
+        console.log("Turn ending in room " + roomName + ".");
+    });
+
     socket.on("hint", (hint, roomName) => {
         console.log("Hint " + hint + " for room " + roomName + ".");
-        //socket.emit("hint", hint);
         io.to(roomName).emit("hint", hint);
     });
 
@@ -234,17 +234,14 @@ io.on("connection", (socket) => {
 
         switch(team) {
             case "A":
-                //socket.emit("teamAChat", user, message);
                 io.to(roomName).emit("teamAChat", user, message);
                 break;
             case "B":
-                //socket.emit("teamBChat", user, message);
                 io.to(roomName).emit("teamBChat", user, message);
                 break;
         }
     });
 });
-
 
 server.listen(3000, () => {
     console.log("Listening on 3000");
