@@ -214,9 +214,9 @@ io.on("connection", (socket) => {
         io.to(roomName).emit("teamChange", user, team);
     });
 
-    socket.on("wordButton", (word, roomName) => {
-        io.to(roomName).emit("wordButton", word);
-        console.log("Word " + word + " selected in room " + roomName + ".");
+    socket.on("wordButton", (word, username, roomName) => {
+        io.to(roomName).emit("wordButton", word, username);
+        console.log("Word " + word + " selected in room " + roomName + " by " + username + ".");
     });
 
     socket.on("endTurn", (roomName) => {
