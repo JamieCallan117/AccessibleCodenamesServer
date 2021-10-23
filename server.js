@@ -176,6 +176,7 @@ io.on("connection", (socket) => {
 
         //Team A Spymaster.
         if (teamSpymaster === "A") {
+            //Successful request.
             if (rooms[roomName].teamASpy === undefined) {
                 //Sets the user as the Team A spymaster and emits to all users to update their game details.
                 rooms[roomName].teamASpy = user;
@@ -188,6 +189,7 @@ io.on("connection", (socket) => {
             }
         //Team B Spymaster.
         } else {
+            //Successful request.
             if (rooms[roomName].teamBSpy === undefined) {
                 //Sets the user as the Team B spymaster and emits to all users to update their game details.
                 rooms[roomName].teamBSpy = user;
