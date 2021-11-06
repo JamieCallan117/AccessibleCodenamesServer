@@ -11,9 +11,11 @@ io.on("connection", (socket) => {
     console.log("User connected.");
 
     //Creates a game room
-    socket.once("createRoom", (user, roomName, password, allWords, bombWords, neutralWords, teamASquares, teamBSquares, startingTeam) => {
+    socket.once("createRoom", (user, roomName, password, allWords, bombWords, neutralWords, teamASquares,
+                               teamBSquares, startingTeam) => {
         let newRoom = { roomName, password, users: [], closed: false, started: false, teamAUsers: [], teamBUsers: [],
-            teamASpy: undefined, teamBSpy: undefined, allWords, bombWords, neutralWords, teamASquares, teamBSquares, startingTeam };
+            teamASpy: undefined, teamBSpy: undefined, allWords, bombWords, neutralWords, teamASquares, teamBSquares,
+            startingTeam };
 
         if (rooms[roomName] !== undefined) {
             socket.emit("createFail", "The room " + roomName + " already exists.")
@@ -268,7 +270,7 @@ io.on("connection", (socket) => {
     });
 });
 
-//Hosts the server on the local IP at port 3000.
-server.listen(3000, () => {
-    console.log("Listening on 3000");
+//Hosts the server on the local IP at port 8080.
+server.listen(8080, () => {
+    console.log("Listening on 8080");
 });
