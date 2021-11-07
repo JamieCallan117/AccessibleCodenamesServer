@@ -271,6 +271,6 @@ io.on("connection", (socket) => {
 });
 
 //Hosts the server.
-server.listen( () => {
+server.listen(8080, () => {
     console.log("Server is listening");
 });
