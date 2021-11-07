@@ -270,7 +270,7 @@ io.on("connection", (socket) => {
     });
 });
 
-//Hosts the server on the local IP at port 8080.
-server.listen(8080, () => {
-    console.log("Listening on 8080");
+//Hosts the server.
+server.listen( () => {
+    console.log("Server is listening");
 });
