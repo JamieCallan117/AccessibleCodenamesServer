@@ -22,7 +22,7 @@ io.on("connection", (socket) => {
         } else {
             rooms[newRoom.roomName] = newRoom;
 
-            console.log(user + " created room: " + roomName + ". Password: " + password);
+            console.log("CS: " + user + " created room: " + roomName + ". Password: " + password);
 
             socket.join(roomName);
             newRoom.users.push(user);
