@@ -8,7 +8,7 @@ let rooms = {};
 
 //Initial client connection.
 io.on("connection", (socket) => {
-    console.log("User connected.");
+    console.log("CS: User connected.");
 
     //Creates a game room
     socket.once("createRoom", (user, roomName, password, allWords, bombWords, neutralWords, teamASquares,
@@ -29,30 +29,30 @@ io.on("connection", (socket) => {
 
             socket.on("startGame", () => {
                 if ((newRoom.teamAUsers.length + newRoom.teamBUsers.length) !== newRoom.users.length) {
-                    console.log("Cannot start game. Not all users have selected a team.");
+                    console.log("CS: Cannot start game. Not all users have selected a team.");
                     socket.emit("startFail", "Not all users have selected a team.");
                 } else if (newRoom.teamASpy === undefined) {
-                    console.log("Cannot start game. Team A does not have a Spymaster.");
+                    console.log("CS: Cannot start game. Team A does not have a Spymaster.");
                     socket.emit("startFail", "Team A does not have a Spymaster.");
                 } else if (newRoom.teamBSpy === undefined) {
-                    console.log("Cannot start game. Team B does not have a Spymaster.");
+                    console.log("CS: Cannot start game. Team B does not have a Spymaster.");
                     socket.emit("startFail", "Team B does not have a Spymaster.");
                 } else if (newRoom.teamAUsers.length < 2) {
-                    console.log("Cannot start game. Team A does not have enough members.");
+                    console.log("CS: Cannot start game. Team A does not have enough members.");
                     socket.emit("startFail", "Team A does not have enough members.");
                 } else if (newRoom.teamBUsers.length < 2) {
-                    console.log("Cannot start game. Team B does not have enough members.");
+                    console.log("CS: Cannot start game. Team B does not have enough members.");
                     socket.emit("startFail", "Team B does not have enough members.");
                 } else {
                     newRoom.started = true;
-                    console.log("Successfully started game in room " + roomName);
+                    console.log("CS: Successfully started game in room " + roomName);
                     io.to(roomName).emit("startSuccess")
                 }
             });
 
             socket.once("leaveRoom", () => {
                 if (!newRoom.closed) {
-                    console.log("Host has left. Closing room " + roomName + ".")
+                    console.log("CS: Host has left. Closing room " + roomName + ".")
                     io.to(roomName).emit("hostQuit");
 
                     rooms[roomName] = undefined;
@@ -63,7 +63,7 @@ io.on("connection", (socket) => {
 
             socket.once("disconnect", () => {
                 if (!newRoom.closed) {
-                    console.log("Host has left. Closing room " + roomName + ".")
+                    console.log("CS: Host has left. Closing room " + roomName + ".")
                     io.to(roomName).emit("hostQuit");
 
                     rooms[roomName] = undefined;
@@ -79,19 +79,19 @@ io.on("connection", (socket) => {
         let roomToJoin = rooms[roomName];
 
         if (roomToJoin === undefined) {
-            console.log("Room " + roomName + " not found.")
+            console.log("CS: Room " + roomName + " not found.")
             socket.emit("joinFail", "Room " + roomName + " not found.")
         } else if (roomToJoin.password !== password) {
-            console.log("Invalid password for room " + roomName + ".")
+            console.log("CS: Invalid password for room " + roomName + ".")
             socket.emit("joinFail", "Invalid password for room " + roomName + ".")
         } else if (roomToJoin.users.find(userName => user === userName) !== undefined) {
-            console.log("Username " + user + " in use.")
+            console.log("CS: Username " + user + " in use.")
             socket.emit("joinFailNick", "Username " + user + " in use.")
         } else if (roomToJoin.started) {
-            console.log("Room " + roomName + " has already started.");
+            console.log("CS: Room " + roomName + " has already started.");
             socket.emit("joinFail", "Room " + roomName + " has already started.");
         } else {
-            console.log("User " + user + " successfully joined room " + roomName + ".")
+            console.log("CS: User " + user + " successfully joined room " + roomName + ".")
             socket.join(roomName);
             roomToJoin.users.push(user);
 
@@ -101,15 +101,15 @@ io.on("connection", (socket) => {
                 const teamBIndex = rooms[roomName].teamBUsers.indexOf(user);
 
                 if (teamAIndex > -1) {
-                    console.log("User " + user + " has left team A.");
+                    console.log("CS: User " + user + " has left team A.");
                     rooms[roomName].teamAUsers.splice(teamAIndex, 1);
                 } else if (teamBIndex > -1) {
-                    console.log("User " + user + " has left team B.");
+                    console.log("CS: User " + user + " has left team B.");
                     rooms[roomName].teamBUsers.splice(teamBIndex, 1);
                 }
 
                 if (index > -1) {
-                    console.log("User " + user + " has left the room " + roomName + ".");
+                    console.log("CS: User " + user + " has left the room " + roomName + ".");
                     roomToJoin.users.splice(index, 1);
                 }
 
@@ -117,11 +117,11 @@ io.on("connection", (socket) => {
 
                 if (user === roomToJoin.teamASpy) {
                     roomToJoin.teamASpy = undefined;
-                    console.log("Team A Spymaster has left the room.");
+                    console.log("CS: Team A Spymaster has left the room.");
                     io.to(roomName).emit("spymasterQuitA", user);
                 } else if (user === roomToJoin.teamBSpy) {
                     roomToJoin.teamBSpy = undefined;
-                    console.log("Team B Spymaster has left the room.");
+                    console.log("CS: Team B Spymaster has left the room.");
                     io.to(roomName).emit("spymasterQuitB", user);
                 }
             });
@@ -132,15 +132,15 @@ io.on("connection", (socket) => {
                 const teamBIndex = rooms[roomName].teamBUsers.indexOf(user);
 
                 if (teamAIndex > -1) {
-                    console.log("User " + user + " has left team A.");
+                    console.log("CS: User " + user + " has left team A.");
                     rooms[roomName].teamAUsers.splice(teamAIndex, 1);
                 } else if (teamBIndex > -1) {
-                    console.log("User " + user + " has left team B.");
+                    console.log("CS: User " + user + " has left team B.");
                     rooms[roomName].teamBUsers.splice(teamBIndex, 1);
                 }
 
                 if (index > -1) {
-                    console.log("User " + user + " has disconnected.");
+                    console.log("CS: User " + user + " has disconnected.");
                     roomToJoin.users.splice(index, 1);
                 }
 
@@ -148,11 +148,11 @@ io.on("connection", (socket) => {
 
                 if (user === roomToJoin.teamASpy) {
                     roomToJoin.teamASpy = undefined;
-                    console.log("Team A Spymaster has left the room.");
+                    console.log("CS: Team A Spymaster has left the room.");
                     io.to(roomName).emit("spymasterQuitA", user);
                 } else if (user === roomToJoin.teamBSpy) {
                     roomToJoin.teamBSpy = undefined;
-                    console.log("Team B Spymaster has left the room.");
+                    console.log("CS: Team B Spymaster has left the room.");
                     io.to(roomName).emit("spymasterQuitB", user);
                 }
             });
@@ -161,12 +161,13 @@ io.on("connection", (socket) => {
 
     //Returns a list of all rooms.
     socket.on("getAllRooms", () => {
+        console.log("CS: Retrieving all rooms");
         socket.emit("allRooms", rooms);
     });
 
     //Returns all the values associated with a specific room.
     socket.on("getGameDetails", (roomName) => {
-        console.log("Retrieving game details for room " + roomName + ".");
+        console.log("CS: Retrieving game details for room " + roomName + ".");
         socket.emit("gameDetails", rooms[roomName].allWords, rooms[roomName].teamAUsers, rooms[roomName].teamBUsers,
             rooms[roomName].teamASpy, rooms[roomName].teamBSpy, rooms[roomName].bombWords, rooms[roomName].neutralWords,
             rooms[roomName].teamASquares, rooms[roomName].teamBSquares, rooms[roomName].startingTeam);
@@ -174,7 +175,7 @@ io.on("connection", (socket) => {
 
     //Allows a member of a room to request the spymaster role for their team.
     socket.on("requestSpymaster", (user, roomName, teamSpymaster) => {
-        console.log("User " + user + " has request spymaster for team " + teamSpymaster + " in room " + roomName + ".");
+        console.log("CS: User " + user + " has request spymaster for team " + teamSpymaster + " in room " + roomName + ".");
 
         //Team A Spymaster.
         if (teamSpymaster === "A") {
@@ -182,11 +183,11 @@ io.on("connection", (socket) => {
             if (rooms[roomName].teamASpy === undefined) {
                 //Sets the user as the Team A spymaster and emits to all users to update their game details.
                 rooms[roomName].teamASpy = user;
-                console.log("User " + user + " is now the spymaster for team" + teamSpymaster + " in room " + roomName + ".");
+                console.log("CS: User " + user + " is now the spymaster for team" + teamSpymaster + " in room " + roomName + ".");
                 io.to(roomName).emit("teamASpymaster", user);
             //Failed request.
             } else {
-                console.log("User " + user + " was denied spymaster for team" + teamSpymaster + " in room " + roomName + ".");
+                console.log("CS: User " + user + " was denied spymaster for team" + teamSpymaster + " in room " + roomName + ".");
                 socket.emit("spymasterFail")
             }
         //Team B Spymaster.
@@ -195,11 +196,11 @@ io.on("connection", (socket) => {
             if (rooms[roomName].teamBSpy === undefined) {
                 //Sets the user as the Team B spymaster and emits to all users to update their game details.
                 rooms[roomName].teamBSpy = user;
-                console.log("User " + user + " is now the spymaster for team" + teamSpymaster + " in room " + roomName + ".");
+                console.log("CS: User " + user + " is now the spymaster for team" + teamSpymaster + " in room " + roomName + ".");
                 io.to(roomName).emit("teamBSpymaster", user);
             //Failed request.
             } else {
-                console.log("User " + user + " was denied spymaster for team" + teamSpymaster + " in room " + roomName + ".");
+                console.log("CS: User " + user + " was denied spymaster for team" + teamSpymaster + " in room " + roomName + ".");
                 socket.emit("spymasterFail")
             }
         }
@@ -212,12 +213,12 @@ io.on("connection", (socket) => {
 
         //Removes the user from Team A if they wish to swap to Team B
         if (teamAIndex > -1) {
-            console.log("User " + user + " has left team A.");
+            console.log("CS: User " + user + " has left team A.");
             rooms[roomName].teamAUsers.splice(teamAIndex, 1);
             rooms[roomName].teamBUsers.push(user);
         //Removes the user from Team B if they wish to swap to Team A
         } else if (teamBIndex > -1) {
-            console.log("User " + user + " has left team B.");
+            console.log("CS: User " + user + " has left team B.");
             rooms[roomName].teamBUsers.splice(teamBIndex, 1);
             rooms[roomName].teamAUsers.push(user);
         //Adds the user to Team A/B depending on which they wish to join.
@@ -229,7 +230,7 @@ io.on("connection", (socket) => {
             }
         }
 
-        console.log("User " + user + " has joined team " + team + ".");
+        console.log("CS: User " + user + " has joined team " + team + ".");
 
         //Emits to let other room members know of the team change.
         io.to(roomName).emit("teamChange", user, team);
@@ -238,24 +239,24 @@ io.on("connection", (socket) => {
     //Used for when a WordButton has been pressed so that all users can update their game status.
     socket.on("wordButton", (word, username, roomName) => {
         io.to(roomName).emit("wordButton", word, username);
-        console.log("Word " + word + " selected in room " + roomName + " by " + username + ".");
+        console.log("CS: Word " + word + " selected in room " + roomName + " by " + username + ".");
     });
 
     //Used for when a user chooses to end their teams turn.
     socket.on("endTurn", (roomName) => {
         io.to(roomName).emit("endTurn");
-        console.log("Turn ending in room " + roomName + ".");
+        console.log("CS: Turn ending in room " + roomName + ".");
     });
 
     //Used for when a spymaster gives a hint to their team.
     socket.on("hint", (hint, roomName) => {
-        console.log("Hint " + hint + " for room " + roomName + ".");
+        console.log("CS: Hint " + hint + " for room " + roomName + ".");
         io.to(roomName).emit("hint", hint);
     });
 
     //Used for sending chat messages to the room.
     socket.on("chat", (user, team, message, roomName) => {
-        console.log("Message from user " + user + " on team " + team + ": " + message);
+        console.log("CS: Message from user " + user + " on team " + team + ": " + message);
 
         switch(team) {
             case "A":
@@ -268,9 +269,13 @@ io.on("connection", (socket) => {
                 break;
         }
     });
+
+    socket.on("disconnect", () => {
+        console.log("CS: User has disconnected.");
+    })
 });
 
 //Hosts the server.
 server.listen(8080, () => {
-    console.log("Server is listening");
+    console.log("CS: Server is listening");
 });
