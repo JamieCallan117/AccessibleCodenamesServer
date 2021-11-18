@@ -10,6 +10,8 @@ let rooms = {};
 io.on("connection", (socket) => {
     console.log("CS: User connected.");
 
+    socket.emit("connected", "A")
+
     //Creates a game room
     socket.once("createRoom", (user, roomName, password, allWords, bombWords, neutralWords, teamASquares,
                                teamBSquares, startingTeam) => {
