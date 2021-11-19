@@ -2,9 +2,7 @@ runtime: nodejs
 env: flex
 instance_class: F1
 automatic_scaling:
-  min_idle_instances: automatic
-  max_idle_instances: automatic
-  min_pending_latency: automatic
-  max_pending_latency: automatic
+  min_num_instances: 1
+  max_num_instances: 1
 network:
   session_affinity: true
