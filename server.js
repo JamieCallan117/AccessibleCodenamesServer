@@ -10,8 +10,6 @@ let rooms = {};
 io.on("connection", (socket) => {
     console.log("CS: User connected.");
 
-    socket.emit("connected", "A")
-
     //Creates a game room
     socket.once("createRoom", (user, roomName, password, allWords, bombWords, neutralWords, teamASquares,
                                teamBSquares, startingTeam) => {
@@ -98,64 +96,68 @@ io.on("connection", (socket) => {
             roomToJoin.users.push(user);
 
             socket.once("leaveRoom", () => {
-                const index = roomToJoin.users.indexOf(user);
-                const teamAIndex = rooms[roomName].teamAUsers.indexOf(user);
-                const teamBIndex = rooms[roomName].teamBUsers.indexOf(user);
+                if (!roomToJoin.closed) {
+                    const index = roomToJoin.users.indexOf(user);
+                    const teamAIndex = rooms[roomName].teamAUsers.indexOf(user);
+                    const teamBIndex = rooms[roomName].teamBUsers.indexOf(user);
 
-                if (teamAIndex > -1) {
-                    console.log("CS: User " + user + " has left team A.");
-                    rooms[roomName].teamAUsers.splice(teamAIndex, 1);
-                } else if (teamBIndex > -1) {
-                    console.log("CS: User " + user + " has left team B.");
-                    rooms[roomName].teamBUsers.splice(teamBIndex, 1);
-                }
+                    if (teamAIndex > -1) {
+                        console.log("CS: User " + user + " has left team A.");
+                        rooms[roomName].teamAUsers.splice(teamAIndex, 1);
+                    } else if (teamBIndex > -1) {
+                        console.log("CS: User " + user + " has left team B.");
+                        rooms[roomName].teamBUsers.splice(teamBIndex, 1);
+                    }
 
-                if (index > -1) {
-                    console.log("CS: User " + user + " has left the room " + roomName + ".");
-                    roomToJoin.users.splice(index, 1);
-                }
+                    if (index > -1) {
+                        console.log("CS: User " + user + " has left the room " + roomName + ".");
+                        roomToJoin.users.splice(index, 1);
+                    }
 
-                io.to(roomName).emit("playerQuit", user);
+                    io.to(roomName).emit("playerQuit", user);
 
-                if (user === roomToJoin.teamASpy) {
-                    roomToJoin.teamASpy = undefined;
-                    console.log("CS: Team A Spymaster has left the room.");
-                    io.to(roomName).emit("spymasterQuitA", user);
-                } else if (user === roomToJoin.teamBSpy) {
-                    roomToJoin.teamBSpy = undefined;
-                    console.log("CS: Team B Spymaster has left the room.");
-                    io.to(roomName).emit("spymasterQuitB", user);
+                    if (user === roomToJoin.teamASpy) {
+                        roomToJoin.teamASpy = undefined;
+                        console.log("CS: Team A Spymaster has left the room.");
+                        io.to(roomName).emit("spymasterQuitA", user);
+                    } else if (user === roomToJoin.teamBSpy) {
+                        roomToJoin.teamBSpy = undefined;
+                        console.log("CS: Team B Spymaster has left the room.");
+                        io.to(roomName).emit("spymasterQuitB", user);
+                    }
                 }
             });
 
             socket.once("disconnect", () => {
-                const index = roomToJoin.users.indexOf(user);
-                const teamAIndex = rooms[roomName].teamAUsers.indexOf(user);
-                const teamBIndex = rooms[roomName].teamBUsers.indexOf(user);
+                if (!roomToJoin.closed) {
+                    const index = roomToJoin.users.indexOf(user);
+                    const teamAIndex = rooms[roomName].teamAUsers.indexOf(user);
+                    const teamBIndex = rooms[roomName].teamBUsers.indexOf(user);
 
-                if (teamAIndex > -1) {
-                    console.log("CS: User " + user + " has left team A.");
-                    rooms[roomName].teamAUsers.splice(teamAIndex, 1);
-                } else if (teamBIndex > -1) {
-                    console.log("CS: User " + user + " has left team B.");
-                    rooms[roomName].teamBUsers.splice(teamBIndex, 1);
-                }
+                    if (teamAIndex > -1) {
+                        console.log("CS: User " + user + " has left team A.");
+                        rooms[roomName].teamAUsers.splice(teamAIndex, 1);
+                    } else if (teamBIndex > -1) {
+                        console.log("CS: User " + user + " has left team B.");
+                        rooms[roomName].teamBUsers.splice(teamBIndex, 1);
+                    }
 
-                if (index > -1) {
-                    console.log("CS: User " + user + " has disconnected.");
-                    roomToJoin.users.splice(index, 1);
-                }
+                    if (index > -1) {
+                        console.log("CS: User " + user + " has disconnected.");
+                        roomToJoin.users.splice(index, 1);
+                    }
 
-                io.to(roomName).emit("playerQuit", user);
+                    io.to(roomName).emit("playerQuit", user);
 
-                if (user === roomToJoin.teamASpy) {
-                    roomToJoin.teamASpy = undefined;
-                    console.log("CS: Team A Spymaster has left the room.");
-                    io.to(roomName).emit("spymasterQuitA", user);
-                } else if (user === roomToJoin.teamBSpy) {
-                    roomToJoin.teamBSpy = undefined;
-                    console.log("CS: Team B Spymaster has left the room.");
-                    io.to(roomName).emit("spymasterQuitB", user);
+                    if (user === roomToJoin.teamASpy) {
+                        roomToJoin.teamASpy = undefined;
+                        console.log("CS: Team A Spymaster has left the room.");
+                        io.to(roomName).emit("spymasterQuitA", user);
+                    } else if (user === roomToJoin.teamBSpy) {
+                        roomToJoin.teamBSpy = undefined;
+                        console.log("CS: Team B Spymaster has left the room.");
+                        io.to(roomName).emit("spymasterQuitB", user);
+                    }
                 }
             });
         }
