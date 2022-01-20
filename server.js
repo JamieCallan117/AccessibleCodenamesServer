@@ -119,11 +119,11 @@ io.on("connection", (socket) => {
                     if (user === roomToJoin.teamASpy) {
                         roomToJoin.teamASpy = undefined;
                         console.log("CS: Team A Spymaster has left the room.");
-                        io.to(roomName).emit("spymasterQuitA", user);
+                        io.to(roomName).emit("spymasterQuitA");
                     } else if (user === roomToJoin.teamBSpy) {
                         roomToJoin.teamBSpy = undefined;
                         console.log("CS: Team B Spymaster has left the room.");
-                        io.to(roomName).emit("spymasterQuitB", user);
+                        io.to(roomName).emit("spymasterQuitB");
                     }
                 }
             });
