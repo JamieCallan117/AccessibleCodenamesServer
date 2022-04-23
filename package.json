@@ -8,14 +8,14 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-	"start": "node server.js"
+    "start": "node server.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "@google-cloud/storage": "^5.15.5",
-    "express": "^4.17.1",
+    "express": "^4.17.3",
     "socket.io": "^4.1.3"
   }
 }

@@ -10,39 +10,50 @@ let rooms = {};
 io.on("connection", (socket) => {
     console.log("CS: User connected.");
 
-    //Creates a game room
+    //Creates a game room.
     socket.once("createRoom", (user, roomName, password, allWords, bombWords, neutralWords, teamASquares,
                                teamBSquares, startingTeam) => {
+        //Sets up the room with all details
         let newRoom = { roomName, password, users: [], closed: false, started: false, teamAUsers: [], teamBUsers: [],
             teamASpy: undefined, teamBSpy: undefined, allWords, bombWords, neutralWords, teamASquares, teamBSquares,
             startingTeam };
 
+        //Checks that a room with this name doesn't already exist.
         if (rooms[roomName] !== undefined) {
             socket.emit("createFail", "The room " + roomName + " already exists.")
         } else {
+            //Creates room.
             rooms[newRoom.roomName] = newRoom;
 
             console.log("CS: " + user + " created room: " + roomName + ". Password: " + password);
 
+            //Adds host to list of users.
             socket.join(roomName);
             newRoom.users.push(user);
 
+            //Start the game.
             socket.on("startGame", () => {
+                //If their are users who haven't selected a team, don't start.
                 if ((newRoom.teamAUsers.length + newRoom.teamBUsers.length) !== newRoom.users.length) {
                     console.log("CS: Cannot start game. Not all users have selected a team.");
                     socket.emit("startFail", "Not all users have selected a team.");
+                //If team A does not have a spymaster, don't start.
                 } else if (newRoom.teamASpy === undefined) {
                     console.log("CS: Cannot start game. Team A does not have a Spymaster.");
                     socket.emit("startFail", "Team A does not have a Spymaster.");
+                //If team B does not have a spymaster, don't start.
                 } else if (newRoom.teamBSpy === undefined) {
                     console.log("CS: Cannot start game. Team B does not have a Spymaster.");
                     socket.emit("startFail", "Team B does not have a Spymaster.");
+                //If team A does not have enough members, don't start.
                 } else if (newRoom.teamAUsers.length < 2) {
                     console.log("CS: Cannot start game. Team A does not have enough members.");
                     socket.emit("startFail", "Team A does not have enough members.");
+                //If team B does not have enough members, don't start.
                 } else if (newRoom.teamBUsers.length < 2) {
                     console.log("CS: Cannot start game. Team B does not have enough members.");
                     socket.emit("startFail", "Team B does not have enough members.");
+                //Valid game, start.
                 } else {
                     newRoom.started = true;
                     console.log("CS: Successfully started game in room " + roomName);
@@ -50,6 +61,7 @@ io.on("connection", (socket) => {
                 }
             });
 
+            //If host leaves the game, close the room.
             socket.once("leaveRoom", () => {
                 if (!newRoom.closed) {
                     console.log("CS: Host has left. Closing room " + roomName + ".")
@@ -61,6 +73,7 @@ io.on("connection", (socket) => {
                 }
             });
 
+            //If hosts disconnects, close the room.
             socket.once("disconnect", () => {
                 if (!newRoom.closed) {
                     console.log("CS: Host has left. Closing room " + roomName + ".")
@@ -78,29 +91,36 @@ io.on("connection", (socket) => {
     socket.once("joinRoom", (user, roomName, password) => {
         let roomToJoin = rooms[roomName];
 
+        //Check that room exists.
         if (roomToJoin === undefined) {
             console.log("CS: Room " + roomName + " not found.")
             socket.emit("joinFail", "Room " + roomName + " not found.")
+        //Check that password is correct.
         } else if (roomToJoin.password !== password) {
             console.log("CS: Invalid password for room " + roomName + ".")
             socket.emit("joinFail", "Invalid password for room " + roomName + ".")
+        //Check that username isn't in use.
         } else if (roomToJoin.users.find(userName => user === userName) !== undefined) {
             console.log("CS: Username " + user + " in use.")
             socket.emit("joinFailNick", "Username " + user + " in use.")
+        ///Check that game hasn't already started.
         } else if (roomToJoin.started) {
             console.log("CS: Room " + roomName + " has already started.");
             socket.emit("joinFail", "Room " + roomName + " has already started.");
+        //Valid join.
         } else {
             console.log("CS: User " + user + " successfully joined room " + roomName + ".")
             socket.join(roomName);
             roomToJoin.users.push(user);
 
+            //If user leaves room.
             socket.once("leaveRoom", () => {
                 if (!roomToJoin.closed) {
                     const index = roomToJoin.users.indexOf(user);
                     const teamAIndex = rooms[roomName].teamAUsers.indexOf(user);
                     const teamBIndex = rooms[roomName].teamBUsers.indexOf(user);
 
+                    //Remove the user from their team.
                     if (teamAIndex > -1) {
                         console.log("CS: User " + user + " has left team A.");
                         rooms[roomName].teamAUsers.splice(teamAIndex, 1);
@@ -116,6 +136,7 @@ io.on("connection", (socket) => {
 
                     io.to(roomName).emit("playerQuit", user);
 
+                    //If user was a spymaster, reallow spymaster request.
                     if (user === roomToJoin.teamASpy) {
                         roomToJoin.teamASpy = undefined;
                         console.log("CS: Team A Spymaster has left the room.");
@@ -128,12 +149,14 @@ io.on("connection", (socket) => {
                 }
             });
 
+            //If user disconnects.
             socket.once("disconnect", () => {
                 if (!roomToJoin.closed) {
                     const index = roomToJoin.users.indexOf(user);
                     const teamAIndex = rooms[roomName].teamAUsers.indexOf(user);
                     const teamBIndex = rooms[roomName].teamBUsers.indexOf(user);
 
+                    //Remove the user from their team.
                     if (teamAIndex > -1) {
                         console.log("CS: User " + user + " has left team A.");
                         rooms[roomName].teamAUsers.splice(teamAIndex, 1);
@@ -149,6 +172,7 @@ io.on("connection", (socket) => {
 
                     io.to(roomName).emit("playerQuit", user);
 
+                    //If user was a spymaster, reallow spymaster request.
                     if (user === roomToJoin.teamASpy) {
                         roomToJoin.teamASpy = undefined;
                         console.log("CS: Team A Spymaster has left the room.");
@@ -274,6 +298,7 @@ io.on("connection", (socket) => {
         }
     });
 
+    //When user disconnects.
     socket.on("disconnect", () => {
         console.log("CS: User has disconnected.");
     })
