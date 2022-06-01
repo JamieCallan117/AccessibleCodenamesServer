@@ -1,4 +1,4 @@
-# AccessibleCodenamesServer | Swansea University Third Year Project
+# Accessible Codenames Server | Swansea University Third Year Project
 
 The online mode of the game I made for my final year project required a server to be made in order for it to be playable.
 The repository for the Android application can be found here: https://github.com/JamieCallan117/Accessible-Codenames
